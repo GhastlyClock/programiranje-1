@@ -8,35 +8,38 @@ import csv
 ###############################################################################
 
 # definiratje URL glavne strani bolhe za oglase z mačkami
-cats_frontpage_url = 'TODO'
+cats_frontpage_url = (
+    'http://www.bolha.com/zivali/male-zivali/macke/'
+    )
 # mapa, v katero bomo shranili podatke
-cat_directory = 'TODO'
+cat_directory = 'cat_data'
 # ime datoteke v katero bomo shranili glavno stran
-frontpage_filename = 'TODO'
+frontpage_filename = 'frontpage.html'
 # ime CSV datoteke v katero bomo shranili podatke
-csv_filename = 'TODO'
+csv_filename = 'cat_data.csv'
 
 
-def download_url_to_string(TODO):
+def download_url_to_string(url):
     '''This function takes a URL as argument and tries to download it
     using requests. Upon success, it returns the page contents as string.'''
     try:
-        # del kode, ki morda sproži napako
-        return TODO
-    except 'TODO':
+        r = requests.get(url)
+    except requests.exceptions.ConnectionError:
+        print('Could not access page ' + url)
         # koda, ki se izvede pri napaki
         # dovolj je če izpišemo opozorilo in prekinemo izvajanje funkcije
-        return TODO
+        return ''
     # nadaljujemo s kodo če ni prišlo do napake
-    return TODO
+    return r.text
 
 
 def save_string_to_file(text, directory, filename):
     '''Write "text" to the file "filename" located in directory "directory",
     creating "directory" if necessary. If "directory" is the empty string, use
     the current directory.'''
-    os.makedirs(directory, exist_ok=True)
-    path = os.path.join(directory, filename)
+    os.makedirs(os.path.join(os.path.dirname(__file__), directory), exist_ok=True)
+    path = os.path.join(os.path.dirname(__file__), directory, filename)
+    print(path)
     with open(path, 'w', encoding='utf-8') as file_out:
         file_out.write(text)
     return None
@@ -44,10 +47,12 @@ def save_string_to_file(text, directory, filename):
 # Definirajte funkcijo, ki prenese glavno stran in jo shrani v datoteko.
 
 
-def save_frontpage(TODO):
+def save_frontpage(url):
     '''Save "cats_frontpage_url" to the file
     "cat_directory"/"frontpage_filename"'''
-    return TODO
+    tekst = download_url_to_string(url)
+    return save_string_to_file(tekst, cat_directory, frontpage_filename)
+
 
 ###############################################################################
 # Po pridobitvi podatkov jih želimo obdelati.
@@ -56,7 +61,11 @@ def save_frontpage(TODO):
 
 def read_file_to_string(directory, filename):
     '''Return the contents of the file "directory"/"filename" as a string.'''
-    return TODO
+    path = os.path.join(os.path.dirname(__file__), directory, filename)
+    with open(path, encoding='utf-8') as datoteka:
+        tekst = datoteka.read()
+    return tekst
+
 
 # Definirajte funkcijo, ki sprejme niz, ki predstavlja vsebino spletne strani,
 # in ga razdeli na dele, kjer vsak del predstavlja en oglas. To storite s
@@ -64,26 +73,53 @@ def read_file_to_string(directory, filename):
 # oglasa. Funkcija naj vrne seznam nizov.
 
 
-def page_to_ads(TODO):
+def page_to_ads(directory, filename):
     '''Split "page" to a list of advertisement blocks.'''
-    return TODO
+    vzorec = re.compile(
+        r'<div class="(ad|ad featured)">'
+        r'.*?'
+        r'<div class="clear"></div>',
+        re.DOTALL
+        )
+    vsebina = read_file_to_string(directory, filename)
+    reklame = []
+    for ujemanje in vzorec.finditer(vsebina):
+        reklame.append(ujemanje.group(0))
+    return reklame
+
 
 # Definirajte funkcijo, ki sprejme niz, ki predstavlja oglas, in izlušči
 # podatke o imenu, ceni in opisu v oglasu.
 
 
-def get_dict_from_ad_block(TODO):
+def get_dict_from_ad_block(oglas):
     '''Build a dictionary containing the name, description and price
     of an ad block.'''
-    return TODO
+    vzorec = re.compile(
+        r'<table><tr><td><a title="(?P<naslov>.+?)" href=.*?'
+        r'</h3>\s+(?P<opis>.*)?\s+<div class="additionalInfo">.*?'
+        r'<div class="price">(<span>)?(?P<cena>.+?)(</span>)?</div>\s+.*?',
+        re.DOTALL
+    )
+    for ujemanje in vzorec.finditer(oglas):
+        print(ujemanje.group(1))
+        print(ujemanje.group(2))
+        print(ujemanje.group(4))
 
+    return None
+
+for i in page_to_ads(cat_directory, frontpage_filename):
+    get_dict_from_ad_block(i)
+    #print(i)
 # Definirajte funkcijo, ki sprejme ime in lokacijo datoteke, ki vsebuje
 # besedilo spletne strani, in vrne seznam slovarjev, ki vsebujejo podatke o
 # vseh oglasih strani.
 
 
-def ads_from_file(TODO):
+def ads_from_file(ime_datoteke, lokacija_datoteke):
     '''Parse the ads in filename/directory into a dictionary list.'''
+    path = os.path.join(os.path.dirname(__file__), directory, filename)
+    with open()
     return TODO
 
 ###############################################################################
