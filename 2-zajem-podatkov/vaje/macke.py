@@ -39,7 +39,6 @@ def save_string_to_file(text, directory, filename):
     the current directory.'''
     os.makedirs(os.path.join(os.path.dirname(__file__), directory), exist_ok=True)
     path = os.path.join(os.path.dirname(__file__), directory, filename)
-    print(path)
     with open(path, 'w', encoding='utf-8') as file_out:
         file_out.write(text)
     return None
@@ -87,7 +86,6 @@ def page_to_ads(directory, filename):
         reklame.append(ujemanje.group(0))
     return reklame
 
-
 # Definirajte funkcijo, ki sprejme niz, ki predstavlja oglas, in izlušči
 # podatke o imenu, ceni in opisu v oglasu.
 
@@ -95,32 +93,35 @@ def page_to_ads(directory, filename):
 def get_dict_from_ad_block(oglas):
     '''Build a dictionary containing the name, description and price
     of an ad block.'''
+    podatki_filmov = []
     vzorec = re.compile(
         r'<table><tr><td><a title="(?P<naslov>.+?)" href=.*?'
-        r'</h3>\s+(?P<opis>.*)?\s+<div class="additionalInfo">.*?'
+        r'</h3>\s+(?P<opis>.*?)\s+(<div|</div).*?'
         r'<div class="price">(<span>)?(?P<cena>.+?)(</span>)?</div>\s+.*?',
         re.DOTALL
     )
+    podatki_filmov = []
+    def pocisti_podatke(vsebina):
+        podatki_filma = vsebina.groupdict()
+        podatki_filma['opis'] = podatki_filma['opis'].strip()
+        podatki_filma['naslov'] = podatki_filma['naslov'].strip().strip('"')
+        podatki_filma['cena'] = (float(podatki_filma['cena'].rstrip(' €').replace(',','.')) if podatki_filma['cena'][-1] == '€' else podatki_filma['cena'])
+        return podatki_filma
     for ujemanje in vzorec.finditer(oglas):
-        print(ujemanje.group(1))
-        print(ujemanje.group(2))
-        print(ujemanje.group(4))
+        podatki_filmov.append(pocisti_podatke(ujemanje))
+    return podatki_filmov[0]
 
-    return None
-
-for i in page_to_ads(cat_directory, frontpage_filename):
-    get_dict_from_ad_block(i)
-    #print(i)
 # Definirajte funkcijo, ki sprejme ime in lokacijo datoteke, ki vsebuje
 # besedilo spletne strani, in vrne seznam slovarjev, ki vsebujejo podatke o
 # vseh oglasih strani.
 
-
 def ads_from_file(ime_datoteke, lokacija_datoteke):
     '''Parse the ads in filename/directory into a dictionary list.'''
-    path = os.path.join(os.path.dirname(__file__), directory, filename)
-    with open()
-    return TODO
+    seznam_filmov = []
+    seznam_reklam = page_to_ads(lokacija_datoteke, ime_datoteke)
+    for reklama in seznam_reklam:
+        seznam_filmov.append(get_dict_from_ad_block(reklama))
+    return seznam_filmov
 
 ###############################################################################
 # Obdelane podatke želimo sedaj shraniti.
@@ -131,8 +132,8 @@ def write_csv(fieldnames, rows, directory, filename):
     '''Write a CSV file to directory/filename. The fieldnames must be a list of
     strings, the rows a list of dictionaries each mapping a fieldname to a
     cell-value.'''
-    os.makedirs(directory, exist_ok=True)
-    path = os.path.join(directory, filename)
+    os.makedirs(os.path.join(os.path.dirname(__file__), directory), exist_ok=True)
+    path = os.path.join(os.path.dirname(__file__), directory, filename)
     with open(path, 'w') as csv_file:
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
         writer.writeheader()
@@ -145,5 +146,10 @@ def write_csv(fieldnames, rows, directory, filename):
 # stolpce [fieldnames] pridobite iz slovarjev.
 
 
-def write_cat_ads_to_csv(TODO):
-    return TODO
+def write_cat_ads_to_csv(seznam_slovarjev, lokacija_datoteke, ime_datoteke_csv):
+    imena_kljucev = [i for i in seznam_slovarjev[0].keys()]
+    write_csv(imena_kljucev, seznam_slovarjev, lokacija_datoteke, ime_datoteke_csv)
+    return None
+
+seznam = ads_from_file(frontpage_filename, cat_directory)
+write_cat_ads_to_csv(seznam, cat_directory, csv_filename)
