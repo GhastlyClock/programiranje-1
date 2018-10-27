@@ -93,7 +93,6 @@ def page_to_ads(directory, filename):
 def get_dict_from_ad_block(oglas):
     '''Build a dictionary containing the name, description and price
     of an ad block.'''
-    podatki_filmov = []
     vzorec = re.compile(
         r'<table><tr><td><a title="(?P<naslov>.+?)" href=.*?'
         r'</h3>\s+(?P<opis>.*?)\s+(<div|</div).*?'
