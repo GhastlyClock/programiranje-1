@@ -9,7 +9,10 @@
  - : int = 3
 [*----------------------------------------------------------------------------*)
 
-let rec penultimate_element = ()
+let rec penultimate_element = function
+  | [] -> raise (Failure "empty list")
+  | prvi::zadnji::[] -> prvi
+  | prvi::ostali -> penultimate_element ostali
 
 (*----------------------------------------------------------------------------*]
  Funkcija [get k list] poišče [k]-ti element v seznamu [list]. Številčenje
@@ -20,7 +23,14 @@ let rec penultimate_element = ()
  - : int = 1
 [*----------------------------------------------------------------------------*)
 
-let rec get = ()
+let rec get indeks my_list = 
+  match my_list with
+  | [] -> raise (Failure "empty list")
+  | prvi::ostali -> 
+      if indeks <= 0 then 
+        prvi
+      else 
+        get (indeks-1) ostali
 
 (*----------------------------------------------------------------------------*]
  Funkcija [double] podvoji pojavitve elementov v seznamu.
@@ -29,7 +39,9 @@ let rec get = ()
  - : int list = [1; 1; 2; 2; 3; 3]
 [*----------------------------------------------------------------------------*)
 
-let rec double = ()
+let rec double = function
+  | [] -> []
+  | prvi::ostali -> prvi :: prvi :: (double ostali)
 
 (*----------------------------------------------------------------------------*]
  Funkcija [divide k list] seznam razdeli na dva seznama. Prvi vsebuje prvih [k]
@@ -42,7 +54,13 @@ let rec double = ()
  - : int list * int list = ([1; 2; 3; 4; 5], [])
 [*----------------------------------------------------------------------------*)
 
-let rec divide = ()
+let rec divide k xs =
+  match (k, xs) with
+  | (_, []) -> ([], [])
+  | (k, list) when k <= 0 -> ([], list)
+  | (k, x :: xs) ->
+  let (l, r) = divide (k-1) xs in
+  (x :: l, r)
 
 (*----------------------------------------------------------------------------*]
  Funkcija [delete k list] iz seznama izbriše [k]-ti element. V primeru
@@ -52,7 +70,14 @@ let rec divide = ()
  - : int list = [0; 0; 0; 0; 0]
 [*----------------------------------------------------------------------------*)
 
-let rec delete = ()
+let rec delete k list = 
+  match list with
+  | [] -> raise (Invalid_argument "index out of range")
+  | prvi::ostali ->
+    if k = 0 then
+      ostali
+    else
+      prvi :: delete (k-1) ostali
 
 (*----------------------------------------------------------------------------*]
  Funkcija [slice i k list] sestavi nov seznam, ki vsebuje elemente seznama
@@ -63,7 +88,13 @@ let rec delete = ()
  - : int list = [1; 2; 3]
 [*----------------------------------------------------------------------------*)
 
-let rec slice = ()
+let rec slice i k list =
+  match list with
+  | [] -> []
+  | prvi::ostali when i <= 0 -> 
+      if (k-1) = 0 then [prvi]
+      else prvi :: slice (i-1) (k-1) ostali
+  | prvi::ostali -> slice (i-1) (k-1) ostali
 
 (*----------------------------------------------------------------------------*]
  Funkcija [insert x k list] na [k]-to mesto seznama [list] vrine element [x].
@@ -85,7 +116,8 @@ let rec insert = ()
  - : int list = [3; 4; 5; 1; 2]
 [*----------------------------------------------------------------------------*)
 
-let rec rotate = ()
+let rec rotate n list =
+  let int list = divide n list
 
 (*----------------------------------------------------------------------------*]
  Funkcija [remove x list] iz seznama izbriše vse pojavitve elementa [x].
