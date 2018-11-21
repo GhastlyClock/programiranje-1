@@ -7,13 +7,13 @@
  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  # penultimate_element [1; 2; 3; 4];;
  - : int = 3
-[*----------------------------------------------------------------------------*)
-
-let rec penultimate_element = function
-  | [] -> raise (Failure "empty list")
-  | prvi::zadnji::[] -> prvi
-  | prvi::ostali -> penultimate_element ostali
-
+ [*----------------------------------------------------------------------------*)
+ 
+ let rec penultimate_element = function
+ | _ :: [] | [] -> raise (Failure "Ni primeren seznam!")
+ | x :: _ :: [] -> x
+ | x :: xs -> penultimate_element xs
+ 
 (*----------------------------------------------------------------------------*]
  Funkcija [get k list] poišče [k]-ti element v seznamu [list]. Številčenje
  elementov seznama (kot ponavadi) pričnemo z 0. Če je k negativen, funkcija
@@ -59,8 +59,8 @@ let rec divide k xs =
   | (_, []) -> ([], [])
   | (k, list) when k <= 0 -> ([], list)
   | (k, x :: xs) ->
-  let (l, r) = divide (k-1) xs in
-  (x :: l, r)
+    let (l, r) = divide (k-1) xs in
+    (x :: l, r)
 
 (*----------------------------------------------------------------------------*]
  Funkcija [delete k list] iz seznama izbriše [k]-ti element. V primeru
@@ -79,6 +79,11 @@ let rec delete k list =
     else
       prvi :: delete (k-1) ostali
 
+let rec delete k = function
+  | [] -> failwith "List is too short."
+  | x :: xs -> if k = 0 then xs else x :: delete (k-1) xs
+
+
 (*----------------------------------------------------------------------------*]
  Funkcija [slice i k list] sestavi nov seznam, ki vsebuje elemente seznama
  [list] od vključno [i]-tega do izključno [k]-tega. Predpostavimo, da sta [i] in
@@ -96,6 +101,13 @@ let rec slice i k list =
       else prvi :: slice (i-1) (k-1) ostali
   | prvi::ostali -> slice (i-1) (k-1) ostali
 
+(*alternativa*)
+
+let slice i k list =
+  let (_, slice1) = divide i list in
+  let (slice2, _) = divide (k - i) slice1 in
+slice2
+
 (*----------------------------------------------------------------------------*]
  Funkcija [insert x k list] na [k]-to mesto seznama [list] vrine element [x].
  Če je [k] izven mej seznama, ga funkcija doda na začetek oziroma na konec.
@@ -106,7 +118,20 @@ let rec slice i k list =
  - : int list = [1; 0; 0; 0; 0; 0]
 [*----------------------------------------------------------------------------*)
 
-let rec insert = ()
+let rec insert x k list =
+  let (slice1, slice2) = divide k list in
+  slice1 @ [x] @ slice2
+
+(*alternativa*)
+
+let rec insert x k list = 
+  match list with
+  | [] -> [x]
+  | y :: ys ->
+    if k <= 0 then
+      x :: y :: ys
+    else
+      y :: insert x (k - 1) ys   
 
 (*----------------------------------------------------------------------------*]
  Funkcija [rotate n list] seznam zavrti za [n] mest v levo. Predpostavimo, da
@@ -116,8 +141,20 @@ let rec insert = ()
  - : int list = [3; 4; 5; 1; 2]
 [*----------------------------------------------------------------------------*)
 
+let rec rotate n list = 
+  let (slice1, slice2) = divide n list in
+  slice2 @ slice1
+
+(*alternativa*)
+  
 let rec rotate n list =
-  let int list = divide n list
+  match list with
+  | [] -> []
+  | x :: xs ->
+    if n <= 0 then
+      list
+    else
+      (rotate (n - 1) xs) @ [x]
 
 (*----------------------------------------------------------------------------*]
  Funkcija [remove x list] iz seznama izbriše vse pojavitve elementa [x].
@@ -126,7 +163,14 @@ let rec rotate n list =
  - : int list = [2; 3; 2; 3]
 [*----------------------------------------------------------------------------*)
 
-let rec remove = ()
+let rec remove x list =
+  match list with
+  | [] -> []
+  | y :: ys ->
+    if y == x then
+      remove x ys
+    else
+      y :: remove x ys
 
 (*----------------------------------------------------------------------------*]
  Funkcija [is_palindrome] za dani seznam ugotovi ali predstavlja palindrom.
@@ -138,7 +182,16 @@ let rec remove = ()
  - : bool = false
 [*----------------------------------------------------------------------------*)
 
-let rec is_palindrome = ()
+let rec reverse xs =
+  let rec reverse' acc = function
+  | [] -> acc
+  | x :: xs -> reverse' (x :: acc) xs
+  in
+  reverse' [] xs
+
+let rec is_palindrome xs = 
+  let obrnjen_sez = reverse xs in
+  obrnjen_sez = xs
 
 (*----------------------------------------------------------------------------*]
  Funkcija [max_on_components] sprejme dva seznama in vrne nov seznam, katerega
@@ -149,7 +202,19 @@ let rec is_palindrome = ()
  - : int list = [5; 4; 3; 3; 4]
 [*----------------------------------------------------------------------------*)
 
-let rec max_on_components = ()
+let rec max_on_components xs ys = 
+  match (xs, ys) with
+  | [] , _ | _ , [] -> []
+  | x :: xs, y :: ys -> 
+    if x > y then
+      x :: max_on_components xs ys
+    else
+      y :: max_on_components xs ys
+
+let rec max_on_components list1 list2 =
+  match (list1, list2) with
+  | (x :: xs, y :: ys) -> max x y :: max_on_components xs ys
+  | _ -> []
 
 (*----------------------------------------------------------------------------*]
  Funkcija [second_largest] vrne drugo največjo vrednost v seznamu. Pri tem se
@@ -161,4 +226,10 @@ let rec max_on_components = ()
  - : int = 10
 [*----------------------------------------------------------------------------*)
 
-let rec second_largest = ()
+let rec second_largest list = 
+  let rec largest = function
+    | [] -> failwith "list is too short"
+      | x :: [] -> x
+      | x :: xs -> max x (largest xs)
+  in
+  largest (remove (largest list) list)
