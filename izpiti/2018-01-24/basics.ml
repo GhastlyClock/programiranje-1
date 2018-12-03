@@ -7,6 +7,11 @@
    Primer: print_all [1; 2; 3; 4] = () in izpiše 1234
    ========================================================================== *)
 
+let rec izpisi_int = function
+  | [] -> ()
+  | x :: xs -> (print_int x); (izpisi_int xs)
+
+
 let rec print_all l =
   match l with
   | [] -> ()
@@ -25,6 +30,22 @@ let rec print_all l =
    Primer: map2_opt [1; 2; 3] [7; 5; 3] (+) = Some [8; 7; 6]
            map2_opt [1; 2; 3] [3; 2] (+) = None
    ========================================================================== *)
+
+let rec reverse xs =
+  let rec reverse' acc = function
+  | [] -> acc
+  | glava :: rep -> reverse' (glava :: acc) rep
+  in
+  reverse' [] xs
+
+let rec nevem xs ys f =
+  let rec arg acc xs ys =
+    match (xs, ys) with
+      | [], [] -> Some (reverse acc)
+      | _, [] | [], _  -> None
+      | x :: xs, y :: ys -> arg ((f x y) :: acc) xs ys
+  in
+  arg [] xs ys
 
 let rec map2_opt l1 l2 f =
   let rec aux l1 l2 f acc =
