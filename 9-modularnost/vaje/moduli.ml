@@ -59,9 +59,7 @@ module type NAT = sig
   val mult : t -> t -> t 
   val to_int : t -> int
   val of_int : int -> t
-  (* Dodajte manjkajoče! *)
-  (* val to_int : t -> int *)
-  (* val of_int : int -> t *)
+
 end
 
 (*----------------------------------------------------------------------------*]
@@ -84,7 +82,6 @@ module Nat_int : NAT = struct
   let mult a b = a * b
   let to_int a = a
   let of_int a = a
-  (* Dodajte manjkajoče! *)
 
 end
 
@@ -111,7 +108,12 @@ module Nat_peano : NAT = struct
     | Succ x -> to_int' (acc + 1) x
     in
     to_int' 0 num
-  let sum = failwith "later"
+  let rec sum a b = 
+    match (a, b) with
+    | (Zero, Zero) -> Zero
+    | (Zero, Succ x) -> Succ (sum Zero x)
+    | (Succ x, Zero) -> Succ (sum x Zero)
+    | (Succ x, Succ y) -> Succ (sum x y)
   let mult = failwith "later"
   let of_int = failwith "later"
   let sub = failwith "later"
