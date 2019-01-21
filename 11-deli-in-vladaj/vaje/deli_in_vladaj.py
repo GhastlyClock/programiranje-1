@@ -27,7 +27,46 @@
 #     [10, 2, 0, 4, 11, 15, 17, 5, 18]
 ##############################################################################
 
+# def pivot(a, start, end):
+#     p = a[start] # Nastavim vrednost pivotnega elementa
+#     indeks = start # Nastavim indeks, s katerim bom menjal kočni položaj pivota
+#     for i in range(start + 1, end):
+#         # Grem skozi seznam od pivota pa do konca in iščem elemente, ki so 'problematični'
+#         if a[i] > p:
+#             j = i + 1
+#             while j <= end: # Nastavim pogoj za ustavitev
+#                 if a[j] <= p:
+#                     indeks = i
+#                     a[i], a[j] = a[j], a[i]
+#                     break
+#                 j += 1
+#     if indeks != start: # Menjam pivotni element z zadnjim različnim od pivota 
+#         for i in range(indeks, start, -1):
+#             if a[indeks] != p:
+#                 a[start], a[indeks] = a[indeks], a[start]
+#                 break
+#     return indeks
 
+# b = [10, 4, 5, 15, 11, 2, 17, 0, 18]
+# # pivot(a, 1, 7)
+# # print(a)
+
+def pivot(a, start, end):
+    piv = a[start]
+    indeks = start + 1
+    for i in range(indeks, end + 1):
+        if a[i] < piv:
+            a[indeks], a[i] = a[i], a[indeks]
+            indeks += 1
+    if indeks - 1 != start: # Menjam pivotni element z zadnjim različnim od pivota 
+        for i in range(indeks - 1, start, -1):
+            if a[indeks - 1] != piv:
+                a[start], a[indeks - 1] = a[indeks - 1], a[start]
+                break
+    return indeks
+a = [10, 4, 5, 15, 11, 2, 17, 0, 18]
+pivot(a, 1, 8)
+print(a)
 
 ##############################################################################
 # Tabelo a želimo urediti z algoritmom hitrega urejanja (quicksort).
@@ -43,7 +82,22 @@
 #   [2, 3, 4, 5, 10, 11, 15, 17, 18]
 ##############################################################################
 
+def quicksort_part(a, start, end):
+    if start < end:
+        delitev = pivot(a, start, end)
+        quicksort_part(a, start, delitev - 1)
+        quicksort_part(a, delitev + 1, end)
+    return a
+    
+a = [10, 4, 5, 15, 11, 3, 17, 2, 18]
+print(quicksort_part(a,0,8))
 
+def quicksort(a):
+    konc = len(a) - 1
+    return quicksort_part(a, 0, konc)
+
+a = [10, 4, 5, 15, 11, 3, 17, 2, 18]
+print(quicksort(a))
 
 ##############################################################################
 # V tabeli želimo poiskati vrednost k-tega elementa po velikosti.
