@@ -29,7 +29,7 @@
 from functools import lru_cache
 
 test_matrix = [[1, 2, 0, 5], [0, 4, 1, 1], [8, 0, 4, 2]]
-
+test = [[2,4,1,1], [3,2,0,5], [8,0,7,2]]
 def max_points(matrix, max_steps):
 
     @lru_cache(maxsize=None)
@@ -58,3 +58,5 @@ def max_points(matrix, max_steps):
 
     #Call function
     return jumper(0,0,max_steps)
+
+print(max_points(test, 6))

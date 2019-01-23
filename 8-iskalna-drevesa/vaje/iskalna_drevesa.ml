@@ -142,6 +142,12 @@ let rec is_bst = function
     (is_bst lt) && 
     (is_bst rt)
 
+let rec is_bst t =
+    let rec list_is_ordered = function
+        | [] | _ :: [] -> true
+        | x :: y :: tl -> if x <= y then list_is_ordered (y :: tl) else false
+    in t |> list_of_tree |> list_is_ordered
+
 (*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*]
  V nadaljevanju predpostavljamo, da imajo dvojiška drevesa strukturo BST.
 [*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*)
@@ -165,7 +171,13 @@ let rec member a = function
             member a rt
         else 
             x = a
-    
+
+let rec member x = function
+    | Empty -> false
+    | Node (_, y, _) when x = y -> true
+    | Node (l, y, r) when x < y -> member x l
+    | Node (l, y, r) -> member x r 
+
 let rec insert a = function
     | Empty -> leaf a
     | Node (lt, x, rt) as drevo ->
@@ -174,6 +186,12 @@ let rec insert a = function
         else if x < a
         then Node (lt, x, insert a rt)
         else drevo
+
+let rec insert a = function
+    | Empty -> leaf a
+    | Node (l, x, r) when x = a -> Node (l, x, r)
+    | Node (l, x, r) when x > a -> Node (insert x l, x, r)
+    | Node (l, x, r) -> Node (l, x, insert a r)
 
 (*----------------------------------------------------------------------------*]
  Funkcija [member2] ne privzame, da je drevo bst.
@@ -210,6 +228,16 @@ let succ = function
         | [] -> None
         | x :: xs -> Some x
      
+let succ bst =
+    let rec minimal = function 
+        | Empty -> None
+        | Node(Empty, x, _) -> Some x
+        | Node(l, _, _) -> minimal l
+    in
+    match bst with
+    | Empty -> None
+    | Node(_, _, r) -> minimal r
+
 let pred = function
     | Empty -> None
     | Node(Empty, a, Empty) -> None
@@ -222,6 +250,16 @@ let pred = function
         | _ :: xs -> iskanje_max xs 
     in
     iskanje_max l
+
+let pred bst =
+    let rec maksimal = function 
+        | Empty -> None
+        | Node(_, x, Empty) -> Some x
+        | Node(_, _, r) -> maksimal r
+    in
+    match bst with
+    | Empty -> None
+    | Node(l, _, _) -> maksimal l
 
 (*----------------------------------------------------------------------------*]
  Na predavanjih ste omenili dva načina brisanja elementov iz drevesa. Prvi 
@@ -251,6 +289,18 @@ let rec delete x = function
 		| None -> failwith " To se ne more zgoditi! "
 		| Some z -> Node(lt, z, delete z rt)
 
+let rec delete x = function
+    | Empty -> Empty
+    | Node(l, y, r) when x > y -> Node(l, y, delete x r)
+    | Node(l, y, r) when x < y -> Node(delete x l, y, r)
+    | Node(l, y, r) as bst -> (
+        (*Potrebno je izbrisati vozlišče.*)
+        match succ bst with
+        | None -> l (*To se zgodi le kadar je [r] enak [Empty].*)
+        | Some s ->
+            let clean_r = delete s r in
+            Node(l, s, clean_r))
+
 (*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*]
  SLOVARJI
 
@@ -265,9 +315,9 @@ let rec delete x = function
 type ('key, 'value) dict = ('key * 'value) tree
 
 (* Alternativa *)
-type ('key, 'value) dict =
+(* type ('key, 'value) dict =
     | Prazno
-    | Sestavljeno of ('key, 'value) dict * ('key * 'value) * ('key, 'value) dict
+    | Sestavljeno of ('key, 'value) dict * ('key * 'value) * ('key, 'value) dict *)
 
 (*----------------------------------------------------------------------------*]
  Napišite testni primer [test_dict]:
@@ -327,6 +377,14 @@ let print_dict dict =
     in
     pom list_of_dict
 
+let rec print_dict = function
+    | Empty -> ()
+    | Node (d_l, (k, v), d_r) -> (
+        print_dict d_l;
+        print_string (k ^ " : "); print_int v; print_newline ();
+        print_dict d_r)
+  
+
 (*----------------------------------------------------------------------------*]
  Funkcija [dict_insert key value dict] v slovar [dict] pod ključ [key] vstavi
  vrednost [value]. Če za nek ključ vrednost že obstaja, jo zamenja.
@@ -350,7 +408,7 @@ let rec dict_insert key value = function
     | Empty -> leaf (key, value)
     | Node(l, (k, v), r) ->
         if key = k then
-            Node(l, (k, v), r)
+            Node(l, (k, value), r)
         else if key < k then
             Node(dict_insert key value l, (k, v), r)
         else

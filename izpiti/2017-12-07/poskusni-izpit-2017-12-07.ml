@@ -23,8 +23,7 @@ let tretji (_, _, a) = a
 (* 1.5) Definirajte funkcijo, ki vzame dve funkciji ter vrne njun kompozitum.
    Primer: /kompozitum succ string_of_int 5 = "6"/ *)
 
-let kompozitum f g a = 
-  f (g a)
+let kompozitum f g = (fun x -> f (g x))
 
 (* ======================================= *)
 (* 2. naloga: podatkovni tipi in rekurzija *)
@@ -36,21 +35,32 @@ let kompozitum f g a =
    - vrednost (koren) tipa /'a/ in
    - seznam (gozd) dreves tipa /'a drevo/. *)
 type 'a drevo =
-  | Node of 'a * 'a drevo list
-  | Box of 'a drevo list
+  | Vrednost of 'a
+  | Seznam of 'a drevo
 
-let poskus = Node(3, [Node (1, []); Box [] ])
+let poskus = Seznam (Vrednost 3)
 
 (* 2.2) Napišite funkcijo, ki vrne koren danega rožnega drevesa. *)
-let koren = failwith "dopolni me"
+let rec koren = function
+  | Vrednost x -> x
+  | Seznam l -> koren l
 
 (* 2.3) Napišite funkcijo, ki preveri, ali drevo celih števil vsebuje kakšno negativno število. *)
-let kaksno_negativno = failwith "dopolni me"
+let rec kaksno_negativno (a: int drevo) = 
+  match a with
+    | Vrednost x -> x < 0
+    | Seznam l -> kaksno_negativno l
 
 (* 2.4) Sestavite funkcijo, ki sprejme naravno število ter sestavi (poljubno)
    drevo, ki ima toliko otrok.
    Namig: napišite pomožno funkcijo, ki ustvari poljuben seznam dane dolžine. *)
-let drevo_z_veliko_otroci = failwith "dopolni me"
+let rec drevo_z_veliko_otroci n =
+  if n <= 0 then
+    Vrednost (Random.int 12112)
+  else
+    Seznam(drevo_z_veliko_otroci (n-1))
+
+
 
 (* 2.5) Sestavite funkcijo, ki izračuna število vseh vozlišč v drevesu.
    Če želite vse točke, mora biti funkcija repno rekurzivna.
@@ -58,4 +68,11 @@ let drevo_z_veliko_otroci = failwith "dopolni me"
    Opomba: kot ste videli na vajah, nekatere funkcije iz modula List,
    na primer List.map, niso repno rekurzivne, zato se jim raje
    izognite. *)
-let velikost = failwith "dopolni me"
+
+let velikost drevo =
+  let rec aux acc = function
+  | Vrednost _ -> 1 + acc
+  | Seznam l -> aux (acc+1) l
+  in
+  aux 0 drevo
+

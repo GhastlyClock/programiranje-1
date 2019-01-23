@@ -64,9 +64,32 @@ def pivot(a, start, end):
                 a[start], a[indeks - 1] = a[indeks - 1], a[start]
                 break
     return indeks
-a = [10, 4, 5, 15, 11, 2, 17, 0, 18]
-pivot(a, 1, 8)
-print(a)
+
+def pivot(a, start, end):
+    # save pivot
+    pivot = a[start]
+    # save pointers
+    front_i = start
+    back_i = end
+    # move pointers and change elements if needed
+    while front_i != back_i:
+        if a[front_i + 1] <= pivot:
+            front_i += 1
+        elif a[back_i] > pivot:
+            back_i -= 1
+        else:
+            temp = a[front_i + 1]
+            a[front_i + 1] = a[back_i]
+            a[back_i] = temp
+    # move pivot
+    a[start] = a[front_i]
+    a[front_i] = pivot
+    # return the final index of pivot
+    return front_i
+
+# a = [10, 4, 5, 15, 11, 2, 17, 0, 18]
+# pivot(a, 1, 8)
+# print(a)
 
 ##############################################################################
 # Tabelo a želimo urediti z algoritmom hitrega urejanja (quicksort).
@@ -89,15 +112,15 @@ def quicksort_part(a, start, end):
         quicksort_part(a, delitev + 1, end)
     return a
     
-a = [10, 4, 5, 15, 11, 3, 17, 2, 18]
-print(quicksort_part(a,0,8))
+# a = [10, 4, 5, 15, 11, 3, 17, 2, 18]
+# print(quicksort_part(a,0,8))
 
 def quicksort(a):
     konc = len(a) - 1
     return quicksort_part(a, 0, konc)
 
-a = [10, 4, 5, 15, 11, 3, 17, 2, 18]
-print(quicksort(a))
+# a = [10, 4, 5, 15, 11, 3, 17, 2, 18]
+# print(quicksort(a))
 
 ##############################################################################
 # V tabeli želimo poiskati vrednost k-tega elementa po velikosti.
@@ -113,3 +136,26 @@ print(quicksort(a))
 # element po velikosti. Funkcija sme spremeniti tabelo [a]. Cilj naloge je, da
 # jo rešite brez da v celoti uredite tabelo [a].
 ##############################################################################
+
+def kth_el_part(a, k, start, end):
+    if start > end:
+        return None
+    else:
+        pivot_i = pivot(a, start, end)
+        if pivot_i == k:
+            return a[pivot_i]
+        elif pivot_i > k:
+            return kth_el_part(a, k, start, pivot_i - 1)
+        else:
+            return kth_el_part(a, k, pivot_i + 1, end)
+
+def kth_element(a, k):
+    if k > len(a):
+        return None
+    else:
+        return kth_el_part(a, k, 0, len(a)-1)    
+
+a = [10, 4, 5, 15, 11, 3, 17, 2, 18]
+print(kth_element(a, 2))
+print(a)
+
